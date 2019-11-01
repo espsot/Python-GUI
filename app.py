@@ -1,42 +1,58 @@
+import imageio
 import tkinter as tk
 from tkinter import filedialog, Text
 import os
 
-# Functions
-
-
-def addApp():
-    filename = filedialog.askopenfilename(initialdir="/", title="Select File",
-                                          filetypes=(("executables", "*.exe"), ("all files", "*.*")))
-    video.append(filename)
-    print(filename)
-
-
-    # Video array
-video = []
-
-# Root to tkinter
+# init tkinter
 root = tk.Tk()
+root.geometry('300x250')
+root.sourceFile = ''
 root.title("Video to GIF")
+root.resizable(0, 0)
 
 
-# Canvas
-canvas = tk.Canvas(root, height=400, width=350, bg="#232323")
-canvas.pack()
+def chooseFile():
+    root.sourceFile = filedialog.askopenfilename(
+        parent=root, initialdir="/", title="Select File", filetypes=(("MP4", "*.mp4"), ("All files", "*")))
 
-# Frame
-frame = tk.Frame(root, bg="white")
-frame.place(relwidth=1, relheight=0.6,  relx=0, rely=0.1)
 
-# Open File Button
-openFile = tk.Button(root, text="Select Video", padx=10,
-                     pady=5, fg="white", bg="#232323", command=addApp)
-openFile.pack()
+# Button component for chooseFile()
+b_chooseFile = tk.Button(root, text="Select File",
+                         width=35, height=2, command=chooseFile)
+b_chooseFile.place(x=25, y=75)
+b_chooseFile.width = 100
 
-# Confirm Selection Button
-confirmFile = tk.Button(root, text="Convert to GIF", padx=9,
-                        pady=5, fg="white", bg="#232323")
-confirmFile.pack()
+print(root.sourceFile)
 
-# Main loop
+
+# Converting video(images) to .gif
+def convertFile(inputPath, targetFormat):
+    outputPath = os.path.splitext(inputPath)[0] + targetFormat
+
+    print(f'converting {inputPath} \n to {outputPath}')
+
+    reader = imageio.get_reader(inputPath)
+    fps = reader.get_meta_data()['fps']
+
+    writer = imageio.get_writer(outputPath, fps=fps)
+
+    for frames in reader:
+        writer.append_data(frames)
+        print(f'Frames {frames}')
+    print('DONE!')
+    writer.close()
+
+
+# Print location of selected File
+def convert():
+    convertFile(root.sourceFile, '.gif')
+
+
+b_convertFile = tk.Button(root, text="Convert", width=15,
+                          height=2, command=convert)
+b_convertFile.place(x=100, y=125)
+b_convertFile.width = 100
+
+
+# Main Loop
 root.mainloop()
